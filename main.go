@@ -35,7 +35,7 @@ func main() {
 	os.Stdout.Write(out)
 }
 
-// MergeGoFiles merges fiel a into file b
+// MergeGoFiles merges file a into file b
 func MergeGoFiles(w io.Writer, fileB, fileA []byte) error {
 	a, err := decorator.Parse(fileA)
 	if err != nil {
@@ -73,18 +73,16 @@ func merge(dest, src *dst.File) {
 		d := dest.Decls[i]
 
 		switch d.(type) {
-		case *dst.FuncDecl:
-			// No action
 		case *dst.GenDecl:
 			dd := d.(*dst.GenDecl)
-
-			// IMPORT Declarations
 			if dd.Tok == token.IMPORT {
 				destImports = dd
+				break
 			}
 		}
 	}
 
+	// copy declarations
 	for i := 0; i < len(src.Decls); i++ {
 		d := src.Decls[i]
 
@@ -95,7 +93,7 @@ func merge(dest, src *dst.File) {
 		case *dst.GenDecl:
 			dd := d.(*dst.GenDecl)
 
-			// IMPORT Declarations
+			// IMPORT Declarations are grouped
 			if dd.Tok == token.IMPORT {
 				// skip
 				for _, iSpec := range src.Imports {
