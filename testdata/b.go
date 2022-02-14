@@ -1,10 +1,9 @@
 package testdata
 
 import (
-    "fmt"
+	"fmt"
 )
 
 func x() {
 	fmt.Println("hello")
 }
-

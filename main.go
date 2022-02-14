@@ -26,25 +26,37 @@ func main() {
 	flag.BoolVar(&writeToFile, "w", writeToFile, "writes result to destination file")
 	flag.Parse()
 
-	files := os.Args[1:]
+	files := flag.Args()
 	if len(files) < 2 {
 		log.Fatal("missing files, ...src dst")
 	}
 
 	dstFile := files[len(files)-1]
-	dst, _ := os.ReadFile(dstFile)
+	dst, err := os.ReadFile(dstFile)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	var buf bytes.Buffer
 	for _, srcFile := range files[:len(files)-1] {
-		src, _ := os.ReadFile(srcFile)
-		MergeGoFiles(&buf, dst, src)
+		src, err := os.ReadFile(srcFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err := MergeGoFiles(&buf, dst, src); err != nil {
+			log.Fatal(err)
+		}
 	}
 	out, err := format.Source(buf.Bytes())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	os.Stdout.Write(out)
+	if !writeToFile {
+		os.Stdout.Write(out)
+		os.Exit(0)
+	}
+	os.WriteFile(dstFile, out, 0644)
 }
 
 // MergeGoFiles merges file a into file b
