@@ -2,11 +2,9 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"go/ast"
 	"go/format"
 	"go/parser"
-	"go/printer"
 	"go/token"
 	"io"
 	"log"
@@ -26,14 +24,18 @@ func main() {
 	var buf bytes.Buffer
 	for _, srcFile := range files[:len(files)-1] {
 		src, _ := os.ReadFile(srcFile)
-		MergeGoFiles(&buf, src, dst)
+		MergeGoFiles(&buf, dst, src)
 	}
-	io.Copy(os.Stdout, &buf)
-	fmt.Fprintln(os.Stdout)
+	out, err := format.Source(buf.Bytes())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	os.Stdout.Write(out)
 }
 
 // MergeGoFiles merges fiel a into file b
-func MergeGoFiles(w io.Writer, fileA, fileB []byte) error {
+func MergeGoFiles(w io.Writer, fileB, fileA []byte) error {
 	afset := token.NewFileSet()
 	a, err := parser.ParseFile(afset, "", fileA, 0)
 	if err != nil {
@@ -55,30 +57,21 @@ func MergeGoFiles(w io.Writer, fileA, fileB []byte) error {
 	}
 
 	// copy missing to fileB, won't work
-	var s *ast.ImportSpec
-	for _, s = range a.Imports {
-		if _, found := imports[s.Path.Value]; !found {
-			addImport(b, s)
-		}
-	}
-	lastImport := s
+	merge(b, a)
 
 	ast.SortImports(bfset, b)
 
 	// write b including new imports
-	if err := printer.Fprint(w, bfset, b); err != nil {
+	if err := format.Node(w, bfset, b); err != nil {
 		return err
 	}
 
-	var buf bytes.Buffer
-	format.Node(&buf, afset, a)
-	restOfA := buf.Bytes()[lastImport.End()+1:]
-	w.Write([]byte("\n"))
-	_, err = w.Write(bytes.TrimSpace(restOfA))
 	return err
 }
 
-func addImport(dst *ast.File, iSpec *ast.ImportSpec) {
+func merge(dst, src *ast.File) {
+	// find dst import declaration
+	var dstImports *ast.GenDecl
 	for i := 0; i < len(dst.Decls); i++ {
 		d := dst.Decls[i]
 
@@ -90,7 +83,27 @@ func addImport(dst *ast.File, iSpec *ast.ImportSpec) {
 
 			// IMPORT Declarations
 			if dd.Tok == token.IMPORT {
-				dd.Specs = append(dd.Specs, iSpec)
+				dstImports = dd
+			}
+		}
+	}
+
+	for i := 0; i < len(src.Decls); i++ {
+		d := src.Decls[i]
+
+		switch d.(type) {
+		case *ast.FuncDecl:
+			dst.Decls = append(dst.Decls, d)
+
+		case *ast.GenDecl:
+			dd := d.(*ast.GenDecl)
+
+			// IMPORT Declarations
+			if dd.Tok == token.IMPORT {
+				// skip
+				for _, iSpec := range src.Imports {
+					dstImports.Specs = append(dstImports.Specs, iSpec)
+				}
 			}
 		}
 	}
