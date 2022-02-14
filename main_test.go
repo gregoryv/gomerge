@@ -20,6 +20,7 @@ func Test_MergeGoFiles(t *testing.T) {
 		"func y()",
 		`"fmt"`,
 		`"strings"`,
+		"// y does stuff",
 	}
 	for _, exp := range exp {
 		if !strings.Contains(got, exp) {

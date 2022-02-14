@@ -2,13 +2,14 @@ package main
 
 import (
 	"bytes"
-	"go/ast"
 	"go/format"
-	"go/parser"
 	"go/token"
 	"io"
 	"log"
 	"os"
+
+	"github.com/dave/dst"
+	"github.com/dave/dst/decorator"
 )
 
 func main() {
@@ -36,14 +37,12 @@ func main() {
 
 // MergeGoFiles merges fiel a into file b
 func MergeGoFiles(w io.Writer, fileB, fileA []byte) error {
-	afset := token.NewFileSet()
-	a, err := parser.ParseFile(afset, "", fileA, 0)
+	a, err := decorator.Parse(fileA)
 	if err != nil {
 		return err
 	}
 
-	bfset := token.NewFileSet()
-	b, err := parser.ParseFile(bfset, "", fileB, 0)
+	b, err := decorator.Parse(fileB)
 	if err != nil {
 		return err
 	}
@@ -59,31 +58,29 @@ func MergeGoFiles(w io.Writer, fileB, fileA []byte) error {
 	// copy missing to fileB, won't work
 	merge(b, a)
 
-	ast.SortImports(bfset, b)
-
 	// write b including new imports
-	if err := format.Node(w, bfset, b); err != nil {
+	if err := decorator.Fprint(w, b); err != nil {
 		return err
 	}
 
-	return err
+	return nil
 }
 
-func merge(dst, src *ast.File) {
+func merge(dest, src *dst.File) {
 	// find dst import declaration
-	var dstImports *ast.GenDecl
-	for i := 0; i < len(dst.Decls); i++ {
-		d := dst.Decls[i]
+	var destImports *dst.GenDecl
+	for i := 0; i < len(dest.Decls); i++ {
+		d := dest.Decls[i]
 
 		switch d.(type) {
-		case *ast.FuncDecl:
+		case *dst.FuncDecl:
 			// No action
-		case *ast.GenDecl:
-			dd := d.(*ast.GenDecl)
+		case *dst.GenDecl:
+			dd := d.(*dst.GenDecl)
 
 			// IMPORT Declarations
 			if dd.Tok == token.IMPORT {
-				dstImports = dd
+				destImports = dd
 			}
 		}
 	}
@@ -92,17 +89,17 @@ func merge(dst, src *ast.File) {
 		d := src.Decls[i]
 
 		switch d.(type) {
-		case *ast.FuncDecl:
-			dst.Decls = append(dst.Decls, d)
+		case *dst.FuncDecl:
+			dest.Decls = append(dest.Decls, d)
 
-		case *ast.GenDecl:
-			dd := d.(*ast.GenDecl)
+		case *dst.GenDecl:
+			dd := d.(*dst.GenDecl)
 
 			// IMPORT Declarations
 			if dd.Tok == token.IMPORT {
 				// skip
 				for _, iSpec := range src.Imports {
-					dstImports.Specs = append(dstImports.Specs, iSpec)
+					destImports.Specs = append(destImports.Specs, iSpec)
 				}
 			}
 		}
