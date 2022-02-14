@@ -1,3 +1,5 @@
+// Command gomerge merges two or more go files, removing duplicate
+// imports.
 package main
 
 import (
@@ -106,6 +108,15 @@ func merge(dest, src *dst.File) {
 		}
 	}
 
+	exists := func(s *dst.ImportSpec) bool {
+		for _, d := range destImports.Specs {
+			d := d.(*dst.ImportSpec)
+			if s.Path.Value == d.Path.Value {
+				return true
+			}
+		}
+		return false
+	}
 	// copy declarations
 	for i := 0; i < len(src.Decls); i++ {
 		d := src.Decls[i]
@@ -121,7 +132,9 @@ func merge(dest, src *dst.File) {
 			if dd.Tok == token.IMPORT {
 				// skip
 				for _, iSpec := range src.Imports {
-					destImports.Specs = append(destImports.Specs, iSpec)
+					if !exists(iSpec) {
+						destImports.Specs = append(destImports.Specs, iSpec)
+					}
 				}
 			}
 		}

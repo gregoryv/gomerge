@@ -28,4 +28,7 @@ func Test_MergeGoFiles(t *testing.T) {
 			t.Fatal("missing", exp)
 		}
 	}
+	if strings.Count(got, `"fmt"`) > 1 {
+		t.Error("multiple fmt imports")
+	}
 }
