@@ -33,63 +33,44 @@ func main() {
 		log.Fatal("missing files, ...src dst")
 	}
 
+	var buf bytes.Buffer
+	Merge(&buf, files)
+
+	if !writeToFile {
+		os.Stdout.Write(buf.Bytes())
+		os.Exit(0)
+	}
 	dstFile := files[len(files)-1]
-	dst, err := os.ReadFile(dstFile)
-	if err != nil {
-		log.Fatal(err)
+	os.WriteFile(dstFile, buf.Bytes(), 0644)
+}
+
+func Merge(w io.Writer, files []string) {
+	// load destination
+	dstFile := files[len(files)-1]
+	dstData, err := os.ReadFile(dstFile)
+	shouldNot(err)
+
+	dest, err := decorator.Parse(dstData)
+	shouldNot(err)
+
+	for _, srcFile := range files[:len(files)-1] {
+		srcData, err := os.ReadFile(srcFile)
+		shouldNot(err)
+		src, err := decorator.Parse(srcData)
+		shouldNot(err)
+
+		merge(dest, src)
 	}
 
 	var buf bytes.Buffer
-	for _, srcFile := range files[:len(files)-1] {
-		src, err := os.ReadFile(srcFile)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if err := MergeGoFiles(&buf, dst, src); err != nil {
-			log.Fatal(err)
-		}
-	}
+	// write out destination source
+	err = decorator.Fprint(&buf, dest)
+	shouldNot(err)
+
+	// tidy, todo use gofmt or not at all
 	out, err := format.Source(buf.Bytes())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if !writeToFile {
-		os.Stdout.Write(out)
-		os.Exit(0)
-	}
-	os.WriteFile(dstFile, out, 0644)
-}
-
-// MergeGoFiles merges file a into file b
-func MergeGoFiles(w io.Writer, fileB, fileA []byte) error {
-	a, err := decorator.Parse(fileA)
-	if err != nil {
-		return err
-	}
-
-	b, err := decorator.Parse(fileB)
-	if err != nil {
-		return err
-	}
-
-	// Start writing output
-	imports := make(map[string]struct{})
-
-	// find distinct imports
-	for _, s := range b.Imports {
-		imports[s.Path.Value] = struct{}{}
-	}
-
-	// copy missing to fileB, won't work
-	merge(b, a)
-
-	// write b including new imports
-	if err := decorator.Fprint(w, b); err != nil {
-		return err
-	}
-
-	return nil
+	shouldNot(err)
+	w.Write(out)
 }
 
 func merge(dest, src *dst.File) {
@@ -139,4 +120,11 @@ func merge(dest, src *dst.File) {
 			}
 		}
 	}
+}
+
+func shouldNot(err error) {
+	if err == nil {
+		return
+	}
+	log.Fatal(err)
 }

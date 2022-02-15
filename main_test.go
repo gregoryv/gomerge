@@ -2,18 +2,19 @@ package main
 
 import (
 	"bytes"
-	"os"
 	"strings"
 	"testing"
 )
 
 func Test_MergeGoFiles(t *testing.T) {
-	a, _ := os.ReadFile("testdata/a.go")
-	b, _ := os.ReadFile("testdata/b.go")
-	var buf bytes.Buffer
-	if err := MergeGoFiles(&buf, a, b); err != nil {
-		t.Fatal(err)
+	files := []string{
+		"testdata/a.go",
+		"testdata/b.go",
+		"testdata/c.go",
 	}
+	var buf bytes.Buffer
+	Merge(&buf, files)
+
 	got := buf.String()
 	exp := []string{
 		"func x()",
