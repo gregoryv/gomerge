@@ -6,6 +6,7 @@ and this project adheres to http://semver.org/spec/v2.0.0.html.
 
 ## [unreleased]
 
+- Don't panic when trying to merge non go files
 - Fix multifile merge
 
 ## [0.2.1] - 2022-02-14

@@ -120,6 +120,12 @@ func load(filename string) *dst.File {
 	data, err := os.ReadFile(filename)
 	check(err)
 
+	defer func() {
+		e := recover()
+		if e != nil {
+			log.Fatal("invalid go file: ", filename)
+		}
+	}()
 	f, err := decorator.Parse(data)
 	check(err)
 	return f
