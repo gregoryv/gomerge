@@ -29,6 +29,7 @@ func main() {
 	flag.Parse()
 
 	files := flag.Args()
+
 	if len(files) < 2 {
 		log.Fatal("missing files, ...src dst")
 	}
@@ -46,30 +47,20 @@ func main() {
 
 func Merge(w io.Writer, files []string) {
 	// load destination
-	dstFile := files[len(files)-1]
-	dstData, err := os.ReadFile(dstFile)
-	shouldNot(err)
-
-	dest, err := decorator.Parse(dstData)
-	shouldNot(err)
+	dest := load(files[len(files)-1])
 
 	for _, srcFile := range files[:len(files)-1] {
-		srcData, err := os.ReadFile(srcFile)
-		shouldNot(err)
-		src, err := decorator.Parse(srcData)
-		shouldNot(err)
-
+		src := load(srcFile)
 		merge(dest, src)
 	}
 
 	var buf bytes.Buffer
 	// write out destination source
-	err = decorator.Fprint(&buf, dest)
-	shouldNot(err)
+	check(decorator.Fprint(&buf, dest))
 
 	// tidy, todo use gofmt or not at all
 	out, err := format.Source(buf.Bytes())
-	shouldNot(err)
+	check(err)
 	w.Write(out)
 }
 
@@ -89,15 +80,6 @@ func merge(dest, src *dst.File) {
 		}
 	}
 
-	exists := func(s *dst.ImportSpec) bool {
-		for _, d := range destImports.Specs {
-			d := d.(*dst.ImportSpec)
-			if s.Path.Value == d.Path.Value {
-				return true
-			}
-		}
-		return false
-	}
 	// copy declarations
 	for i := 0; i < len(src.Decls); i++ {
 		d := src.Decls[i]
@@ -113,7 +95,7 @@ func merge(dest, src *dst.File) {
 			if dd.Tok == token.IMPORT {
 				// skip
 				for _, iSpec := range src.Imports {
-					if !exists(iSpec) {
+					if !exists(destImports, iSpec) {
 						destImports.Specs = append(destImports.Specs, iSpec)
 					}
 				}
@@ -122,7 +104,28 @@ func merge(dest, src *dst.File) {
 	}
 }
 
-func shouldNot(err error) {
+// returns true if import exists in destination import declaration
+func exists(dest *dst.GenDecl, s *dst.ImportSpec) bool {
+	for _, d := range dest.Specs {
+		d := d.(*dst.ImportSpec)
+		if s.Path.Value == d.Path.Value {
+			return true
+		}
+	}
+	return false
+}
+
+func load(filename string) *dst.File {
+	// load destination
+	data, err := os.ReadFile(filename)
+	check(err)
+
+	f, err := decorator.Parse(data)
+	check(err)
+	return f
+}
+
+func check(err error) {
 	if err == nil {
 		return
 	}
