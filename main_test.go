@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func Test_MergeGoFiles(t *testing.T) {
+func Test_Merge(t *testing.T) {
 	files := []string{
 		"testdata/a.go",
 		"testdata/b.go",
@@ -19,6 +19,7 @@ func Test_MergeGoFiles(t *testing.T) {
 	exp := []string{
 		"func x()",
 		"func y()",
+		"func z()",
 		`"fmt"`,
 		`"strings"`,
 		"// y does stuff",
@@ -29,7 +30,15 @@ func Test_MergeGoFiles(t *testing.T) {
 			t.Fatal("missing", exp)
 		}
 	}
-	if strings.Count(got, `"fmt"`) > 1 {
-		t.Error("multiple fmt imports")
+
+	// single occurence
+	unique := []string{
+		`"fmt"`,
+		"package testdata",
+	}
+	for _, s := range unique {
+		if strings.Count(got, s) > 1 {
+			t.Error("multiple:", s)
+		}
 	}
 }
