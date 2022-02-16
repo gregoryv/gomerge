@@ -99,7 +99,9 @@ func merge(dest, src *dst.File) {
 						destImports.Specs = append(destImports.Specs, iSpec)
 					}
 				}
+				return
 			}
+			dest.Decls = append(dest.Decls, d)
 		}
 	}
 }
