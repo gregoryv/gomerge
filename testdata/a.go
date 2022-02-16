@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+type Car struct{}
+
 // y does stuff
 func y() {
 	letters := []string{"a", "b"}
