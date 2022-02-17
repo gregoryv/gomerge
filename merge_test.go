@@ -3,8 +3,9 @@ package main
 import (
 	"bytes"
 	"os"
-	"strings"
 	"testing"
+
+	"github.com/gregoryv/golden"
 )
 
 func TestMerge(t *testing.T) {
@@ -16,12 +17,8 @@ func TestMerge(t *testing.T) {
 	if err := Merge(&buf, dst, src); err != nil {
 		t.Fatal(err)
 	}
-	got := buf.String()
-	if got == "" {
-		t.Error("empty")
-	}
-
-	if strings.Count(got, "package") == 2 {
-		t.Error("duplicate package")
-	}
+	t.Log("dst:", string(dst))
+	t.Log("\nsrc:", string(src))
+	t.Log("----------")
+	golden.Assert(t, buf.String())
 }

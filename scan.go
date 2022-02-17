@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"go/scanner"
 	"go/token"
 	"os"
@@ -31,9 +32,10 @@ type Scanner struct {
 	fset    *token.FileSet
 	src     []byte
 	lastEnd int
+	current token.Pos
 }
 
-func (s *Scanner) FindImports() (importLines []string) {
+func FindImports(s *Scanner) (importLines []string) {
 	// skip to imports
 	s.ScanTo(token.IMPORT)
 
@@ -70,7 +72,13 @@ func (s *Scanner) ScanTo(find token.Token) ([]byte, int) {
 	start := s.lastEnd
 	for {
 		pos, tok, lit := s.Scan()
-		s.lastEnd = s.fset.Position(pos).Offset + len(lit)
+		s.current = pos
+		switch tok {
+		case token.STRING, token.IDENT:
+			s.lastEnd = s.fset.Position(pos).Offset + len(lit)
+		default:
+			s.lastEnd = s.fset.Position(pos).Offset + len(tok.String())
+		}
 		if tok == find {
 			break
 		}
@@ -79,4 +87,16 @@ func (s *Scanner) ScanTo(find token.Token) ([]byte, int) {
 		}
 	}
 	return s.src[start:s.lastEnd], s.lastEnd
+}
+
+func (s *Scanner) Rest() []byte {
+	return s.src[s.lastEnd:]
+}
+
+func (s *Scanner) Before() []byte {
+	return s.src[:s.fset.Position(s.current).Offset]
+}
+
+func (s *Scanner) HasImports() bool {
+	return bytes.Index(s.src, []byte("import")) > 0
 }
