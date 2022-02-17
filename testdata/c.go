@@ -1,8 +1,10 @@
 // c package docs
 package testdata
 
-import "crypto/rand"
+import (
+	cr "crypto/rand"
+)
 
 func z() {
-	_ = rand.Int()
+	_ = cr.Int()
 }
