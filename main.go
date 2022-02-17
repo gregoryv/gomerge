@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"go/format"
-	"go/scanner"
 	"go/token"
 	"io"
 	"log"
@@ -139,41 +138,4 @@ func check(err error) {
 		return
 	}
 	log.Fatal(err)
-}
-
-// ----------------------------------------
-
-func NewGoPrinter(w io.Writer, src []byte, fset *token.FileSet) *GoPrinter {
-	return &GoPrinter{
-		out:  w,
-		src:  src,
-		fset: fset,
-	}
-}
-
-type GoPrinter struct {
-	out     io.Writer
-	src     []byte
-	fset    *token.FileSet
-	lastEnd int // last Offset + len(lit)
-}
-
-func init() {
-	log.SetFlags(0)
-}
-
-func (me *GoPrinter) Print(pos token.Pos, tok token.Token, lit string) {
-	p := me.fset.Position(pos)
-	//log.Printf("%v %v %s\t%s\t%q\n", me.lastEnd, p.Offset, p, tok, lit)
-	me.out.Write(me.src[me.lastEnd:p.Offset])
-	fmt.Fprint(me.out, lit)
-	me.lastEnd = p.Offset + len(lit)
-}
-
-func newScanner(src []byte) (*scanner.Scanner, *token.FileSet) {
-	var s scanner.Scanner
-	fset := token.NewFileSet()                      // positions are relative to fset
-	file := fset.AddFile("", fset.Base(), len(src)) // register input "file"
-	s.Init(file, src, nil /* no error handler */, scanner.ScanComments)
-	return &s, fset
 }

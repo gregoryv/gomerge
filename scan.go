@@ -53,3 +53,11 @@ func scanTo(find token.Token, s *scanner.Scanner, fset *token.FileSet) int {
 	}
 	return lastEnd
 }
+
+func newScanner(src []byte) (*scanner.Scanner, *token.FileSet) {
+	var s scanner.Scanner
+	fset := token.NewFileSet()
+	file := fset.AddFile("", fset.Base(), len(src))
+	s.Init(file, src, nil /* no error handler */, scanner.ScanComments)
+	return &s, fset
+}
