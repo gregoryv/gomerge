@@ -1,3 +1,5 @@
+// Command gomerge merges two or more go files, removing duplicate
+// imports.
 package main
 
 import (
@@ -27,7 +29,7 @@ func main() {
 	}
 
 	var buf bytes.Buffer
-	Merge(&buf, files)
+	//Merge(&buf, files)
 
 	if !writeToFile {
 		os.Stdout.Write(buf.Bytes())
