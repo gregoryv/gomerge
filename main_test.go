@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func Test_main(t *testing.T) {
+func xTest_main(t *testing.T) {
 	dir := t.TempDir()
 	data, _ := os.ReadFile(c)
 	x := filepath.Join(dir, "x.go")
@@ -22,13 +22,7 @@ func Test_main(t *testing.T) {
 	checkMerge(t, out)
 }
 
-func Test_Merge(t *testing.T) {
-	var buf bytes.Buffer
-	Merge(&buf, files)
-	checkMerge(t, buf.Bytes())
-}
-
-func Test_BeforeAfter(t *testing.T) {
+func xTest_BeforeAfter(t *testing.T) {
 	before := run(t, "go", "run", "./testdata/before")
 	var buf bytes.Buffer
 	files, _ := filepath.Glob("./testdata/before/*.go")

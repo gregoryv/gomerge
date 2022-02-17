@@ -1,7 +1,10 @@
 // my command
 package main
 
-import "fmt"
+import (
+	"fmt"
+	x "strings"
+)
 
 func main() {
 	db := &Memory{}
@@ -14,6 +17,5 @@ func main() {
 	for i, car := range result {
 		fmt.Printf("%v. %s\n", i+1, car.String())
 	}
+	x.Join("a", "b")
 }
-
-
