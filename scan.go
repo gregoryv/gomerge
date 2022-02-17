@@ -35,7 +35,7 @@ type Scanner struct {
 
 func (s *Scanner) FindImports() (importLines []string) {
 	// skip to imports
-	s.scanTo(token.IMPORT)
+	s.ScanTo(token.IMPORT)
 
 loop:
 	for {
@@ -63,9 +63,11 @@ loop:
 	return
 }
 
-// scanTo will scan to the given token to find. Returns the position
-// after the found literal or -1 if EOF
-func (s *Scanner) scanTo(find token.Token) int {
+// ScanTo will scan to the given token to find. Returns the content
+// since last scan and position after the found literal or -1 if EOF
+// The result includes the token to find.
+func (s *Scanner) ScanTo(find token.Token) ([]byte, int) {
+	start := s.lastEnd
 	for {
 		pos, tok, lit := s.Scan()
 		s.lastEnd = s.fset.Position(pos).Offset + len(lit)
@@ -73,8 +75,8 @@ func (s *Scanner) scanTo(find token.Token) int {
 			break
 		}
 		if tok == token.EOF {
-			return -1
+			return s.src[start:], -1
 		}
 	}
-	return s.lastEnd
+	return s.src[start:s.lastEnd], s.lastEnd
 }

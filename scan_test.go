@@ -1,6 +1,8 @@
 package main
 
 import (
+	"go/token"
+	"strings"
 	"testing"
 )
 
@@ -34,4 +36,16 @@ func TestScanner_FindImports(t *testing.T) {
 			t.Error(imports)
 		}
 	})
+}
+
+func TestScanner_ScanTo(t *testing.T) {
+	s, _ := NewFileScanner("testdata/a.go")
+	block, _ := s.ScanTo(token.IMPORT)
+	got := string(block)
+	if !strings.Contains(got, "package testdata") {
+		t.Error(got)
+	}
+	if !strings.Contains(got, "import") {
+		t.Error(got)
+	}
 }
