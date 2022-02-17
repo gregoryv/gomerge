@@ -1,8 +1,6 @@
 package testdata
 
-import (
-	"fmt"
-)
+import "fmt"
 
 func x() {
 	fmt.Println("hello")
