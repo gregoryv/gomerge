@@ -1,3 +1,8 @@
-// Command gomerge merges two or more go files, removing duplicate
-// imports.
 package main
+
+import "io"
+
+func Merge(w io.Writer, dst, src []byte) error {
+
+	return nil
+}
