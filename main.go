@@ -14,12 +14,13 @@ func main() {
 	log.SetFlags(0)
 
 	flag.Usage = func() {
-		fmt.Println("Usage: gomerge [OPTION] DST SRC")
+		fmt.Println("Usage: gomerge [OPTIONS] DST SRC")
+		fmt.Println("Options")
 		flag.PrintDefaults()
 	}
 
-	var writeToFile bool
-	flag.BoolVar(&writeToFile, "w", writeToFile, "writes result to destination file")
+	var writeFile bool
+	flag.BoolVar(&writeFile, "w", writeFile, "writes result to destination file")
 	flag.Parse()
 
 	files := flag.Args()
@@ -34,7 +35,7 @@ func main() {
 	var buf bytes.Buffer
 	Merge(&buf, load(dst), load(src))
 
-	if !writeToFile {
+	if !writeFile {
 		os.Stdout.Write(buf.Bytes())
 		os.Exit(0)
 	}
