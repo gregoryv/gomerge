@@ -35,17 +35,17 @@ func y() { strings.Repeat(" ", 10) }`),
 	// func y() { strings.Repeat(" ", 10) }
 }
 
-func TestSplit(t *testing.T) {
+func TestParse(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
 		data := []byte{}
-		Split(data)
+		Parse(data)
 	})
 
 	t.Run("plain", func(t *testing.T) {
 		data := []byte(`package x
 func x() {}
 `)
-		s := Split(data)
+		s := Parse(data)
 		if len(s.Header) != 0 {
 			t.Error("found header: ", s.Header)
 		}
@@ -68,7 +68,7 @@ func x() {}
 
 import "fmt"
 `)
-		s := Split(data)
+		s := Parse(data)
 		if len(s.Header) != 0 {
 			t.Error("found header:", s.Header)
 		}
@@ -94,7 +94,7 @@ import (
 
 func x() {}
 `)
-		s := Split(data)
+		s := Parse(data)
 		if len(s.Header) == 0 {
 			t.Error("empty header")
 		}

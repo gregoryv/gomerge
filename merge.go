@@ -40,8 +40,8 @@ type GoMerge struct {
 }
 
 func (me *GoMerge) Run() error {
-	d := Split(me.dst)
-	s := Split(me.src)
+	d := Parse(me.dst)
+	s := Parse(me.src)
 	w := me.w
 
 	fmt.Fprint(w, d.Header)
@@ -128,8 +128,8 @@ func unique(v []string) []string {
 	return res
 }
 
-// Split splits a valid go file content
-func Split(src []byte) *GoSrc {
+// Parse splits a valid go file content
+func Parse(src []byte) *GoSrc {
 	gos := GoSrc{}
 
 	var s scanner.Scanner
