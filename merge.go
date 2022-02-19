@@ -46,19 +46,22 @@ func (me *GoMerge) Run() error {
 
 	fmt.Fprint(w, d.Header)
 	fmt.Fprint(w, d.Package)
-	fmt.Fprint(w, "\n")
 
 	imports := mergeImports(
 		[]byte(d.Imports),
 		[]byte(s.Imports),
 	)
-	w.Write(imports)
-	fmt.Fprint(w, "\n")
+	if len(imports) > 0 {
+		fmt.Fprint(w, "\n")
+		w.Write(imports)
+		fmt.Fprint(w, "\n")
+	}
 
 	fmt.Fprint(w, d.Rest)
 
+	fmt.Fprint(w, "\n")
 	if me.includeFile {
-		fmt.Fprintln(w, "\n// gomerge src:", me.srcFile)
+		fmt.Fprintln(w, "// gomerge src:", me.srcFile)
 	}
 	fmt.Fprint(w, s.Header)
 	fmt.Fprint(w, s.Rest)
@@ -75,13 +78,16 @@ func (me *GoMerge) SetSrcFile(v string) {
 
 func mergeImports(a, b []byte) []byte {
 	var buf bytes.Buffer
-	all := append(
+	all := unique(append(
 		importLines(a),
 		importLines(b)...,
-	)
+	))
+	if len(all) == 0 {
+		return nil
+	}
 	// todo filter duplicates
 	buf.WriteString("import (\n")
-	for _, line := range unique(all) {
+	for _, line := range all {
 		buf.WriteString("\t")
 		buf.WriteString(line)
 		buf.WriteString("\n")
@@ -122,6 +128,7 @@ func unique(v []string) []string {
 	return res
 }
 
+// Split splits a valid go file content
 func Split(src []byte) *GoSrc {
 	gos := GoSrc{}
 
@@ -174,11 +181,15 @@ loop:
 	buf.Reset()
 
 	// scan for imports
-	var endFound, multi bool
+	var hasImports, endFound, multi bool
+
 	for {
 		pos, tok, lit := s.Scan()
 		if tok == token.EOF {
 			break
+		}
+		if tok == token.IMPORT {
+			hasImports = true
 		}
 
 		var j int
@@ -199,6 +210,7 @@ loop:
 			buf.Write(src[i:j])
 		}
 		i = j
+
 		if endFound {
 			break
 		}
@@ -207,11 +219,14 @@ loop:
 			continue
 		}
 		if !multi && tok == token.SEMICOLON {
+			endFound = true
 			break
 		}
 	}
-	gos.Imports = buf.String()
-	buf.Reset()
+	if hasImports {
+		gos.Imports = buf.String()
+		buf.Reset()
+	}
 
 	// and the rest
 	if i < len(src) {

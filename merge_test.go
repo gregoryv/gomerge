@@ -2,11 +2,27 @@ package gomerge
 
 import (
 	"bytes"
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/gregoryv/golden"
 )
+
+func ExampleMerge() {
+	Merge(os.Stdout,
+		[]byte(`package x
+
+func x() {}`),
+		[]byte(`package x
+func y() {}`),
+	)
+	// output:
+	// package x
+	//
+	// func x() {}
+	// func y() {}
+}
 
 func TestSplit(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
@@ -15,7 +31,9 @@ func TestSplit(t *testing.T) {
 	})
 
 	t.Run("plain", func(t *testing.T) {
-		data := []byte(`package x`)
+		data := []byte(`package x
+func x() {}
+`)
 		s := Split(data)
 		if len(s.Header) != 0 {
 			t.Error("found header: ", s.Header)
@@ -26,8 +44,8 @@ func TestSplit(t *testing.T) {
 		if len(s.Imports) != 0 {
 			t.Error("found imports: ", s.Imports)
 		}
-		if len(s.Rest) != 0 {
-			t.Error("found rest: ", s.Rest)
+		if len(s.Rest) == 0 {
+			t.Error("empty rest")
 		}
 		if s.String() != string(data) {
 			t.Error("not equal")
@@ -86,6 +104,7 @@ func TestGoMerge_Run(t *testing.T) {
 		buf bytes.Buffer
 		dst = []byte(`// my pkg
 package x
+
 import "fmt"
 func gomerge() {}
 `)
