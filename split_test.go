@@ -6,6 +6,16 @@ import (
 	"testing"
 )
 
+func ExampleSplit_header() {
+	data := []byte(`// my docs
+package x
+`)
+	s := Split(data)
+	fmt.Println(s.Header.String())
+	// output:
+	// // my docs
+}
+
 func ExampleSplit_single() {
 	data := []byte(`package x
 
@@ -40,8 +50,11 @@ func TestSplit(t *testing.T) {
 	t.Run("plain", func(t *testing.T) {
 		data := []byte(`package x`)
 		s := Split(data)
-		if s.Header.Len() == 0 {
-			t.Error("empty header")
+		if s.Header.Len() != 0 {
+			t.Error("found header: ", s.Header.String())
+		}
+		if s.Package.Len() == 0 {
+			t.Error("empty package")
 		}
 		if s.Imports.Len() != 0 {
 			t.Error("found imports: ", s.Imports.String())
@@ -57,8 +70,8 @@ func TestSplit(t *testing.T) {
 import "fmt"
 `)
 		s := Split(data)
-		if s.Header.Len() == 0 {
-			t.Error("empty header")
+		if s.Header.Len() != 0 {
+			t.Error("found header:", s.Header.String())
 		}
 		if strings.Contains(s.Header.String(), "import") {
 			t.Error("found import in header")
@@ -72,7 +85,8 @@ import "fmt"
 	})
 
 	t.Run("one import and body", func(t *testing.T) {
-		data := []byte(`package x
+		data := []byte(`// my docs
+package x
 
 import (
 	"fmt"

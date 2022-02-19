@@ -12,6 +12,7 @@ func Merge(w io.Writer, dst, src []byte) error {
 	s := Split(src)
 
 	d.Header.WriteTo(w)
+	d.Package.WriteTo(w)
 	fmt.Fprint(w, "\n")
 
 	imports := mergeImports(

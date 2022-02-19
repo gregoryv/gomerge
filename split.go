@@ -25,8 +25,13 @@ loop:
 		if tok == token.EOF {
 			break
 		}
+		j := fset.Position(pos).Offset
+		if tok == token.PACKAGE {
+			buf.Write(src[i:j])
+			i = j
+			buf = &gos.Package
+		}
 
-		var j int
 		switch tok {
 		case token.STRING, token.IDENT:
 			j = fset.Position(pos).Offset + len(lit)
@@ -97,7 +102,8 @@ loop:
 }
 
 type GoSrc struct {
-	Header  bytes.Buffer // docs and package
+	Header  bytes.Buffer // docs before package
+	Package bytes.Buffer // package
 	Imports bytes.Buffer // imports
 	Rest    bytes.Buffer // rest of the content
 }
@@ -105,6 +111,7 @@ type GoSrc struct {
 func (s *GoSrc) String() string {
 	var buf bytes.Buffer
 	s.Header.WriteTo(&buf)
+	s.Package.WriteTo(&buf)
 	s.Imports.WriteTo(&buf)
 	s.Rest.WriteTo(&buf)
 	return buf.String()
