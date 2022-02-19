@@ -1,4 +1,4 @@
-gomerge - command for merging Go files
+[gomerge](https://pkg.go.dev/github.com/gregoryv/gomerge) - command for merging Go files
 
 ## Quick start
 
