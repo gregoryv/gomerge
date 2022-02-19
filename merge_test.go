@@ -10,7 +10,6 @@ import (
 )
 
 func TestMerge(t *testing.T) {
-
 	var (
 		buf bytes.Buffer
 		dst = []byte(`// my pkg
@@ -41,7 +40,7 @@ func ExampleSplit_header() {
 package x
 `)
 	s := Split(data)
-	fmt.Println(s.Header.String())
+	fmt.Println(s.Header)
 	// output:
 	// // my docs
 }
@@ -54,7 +53,7 @@ import "fmt"
 func x() {}
 `)
 	s := Split(data)
-	fmt.Println(s.Imports.String())
+	fmt.Println(s.Imports)
 	// output:
 	// import "fmt"
 }
@@ -69,7 +68,7 @@ import (
 func x() {}
 `)
 	s := Split(data)
-	fmt.Println(s.Imports.String())
+	fmt.Println(s.Imports)
 	// output:
 	//	import (
 	//	"fmt"
@@ -80,17 +79,17 @@ func TestSplit(t *testing.T) {
 	t.Run("plain", func(t *testing.T) {
 		data := []byte(`package x`)
 		s := Split(data)
-		if s.Header.Len() != 0 {
-			t.Error("found header: ", s.Header.String())
+		if len(s.Header) != 0 {
+			t.Error("found header: ", s.Header)
 		}
-		if s.Package.Len() == 0 {
+		if len(s.Package) == 0 {
 			t.Error("empty package")
 		}
-		if s.Imports.Len() != 0 {
-			t.Error("found imports: ", s.Imports.String())
+		if len(s.Imports) != 0 {
+			t.Error("found imports: ", s.Imports)
 		}
-		if s.Rest.Len() != 0 {
-			t.Error("found rest: ", s.Rest.String())
+		if len(s.Rest) != 0 {
+			t.Error("found rest: ", s.Rest)
 		}
 	})
 
@@ -100,17 +99,17 @@ func TestSplit(t *testing.T) {
 import "fmt"
 `)
 		s := Split(data)
-		if s.Header.Len() != 0 {
-			t.Error("found header:", s.Header.String())
+		if len(s.Header) != 0 {
+			t.Error("found header:", s.Header)
 		}
-		if strings.Contains(s.Header.String(), "import") {
+		if strings.Contains(s.Header, "import") {
 			t.Error("found import in header")
 		}
-		if s.Imports.Len() == 0 {
+		if len(s.Imports) == 0 {
 			t.Error("empty imports")
 		}
-		if s.Rest.Len() != 0 {
-			t.Error("found rest: ", s.Rest.String())
+		if len(s.Rest) != 0 {
+			t.Error("found rest: ", s.Rest)
 		}
 	})
 
@@ -126,16 +125,16 @@ import (
 func x() {}
 `)
 		s := Split(data)
-		if s.Header.Len() == 0 {
+		if len(s.Header) == 0 {
 			t.Error("empty header")
 		}
-		if strings.Contains(s.Header.String(), "import") {
+		if strings.Contains(s.Header, "import") {
 			t.Error("found import in header")
 		}
-		if s.Imports.Len() == 0 {
+		if len(s.Imports) == 0 {
 			t.Error("empty imports")
 		}
-		if s.Rest.Len() == 0 {
+		if len(s.Rest) == 0 {
 			t.Error("empty rest")
 		}
 	})

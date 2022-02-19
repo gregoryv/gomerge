@@ -13,19 +13,19 @@ func Merge(w io.Writer, dst, src []byte) error {
 	d := Split(dst)
 	s := Split(src)
 
-	d.Header.WriteTo(w)
-	d.Package.WriteTo(w)
+	fmt.Fprint(w, d.Header)
+	fmt.Fprint(w, d.Package)
 	fmt.Fprint(w, "\n")
 
 	imports := mergeImports(
-		d.Imports.Bytes(),
-		s.Imports.Bytes(),
+		[]byte(d.Imports),
+		[]byte(s.Imports),
 	)
 	w.Write(imports)
 	fmt.Fprint(w, "\n")
 
-	d.Rest.WriteTo(w)
-	s.Rest.WriteTo(w)
+	fmt.Fprint(w, d.Rest)
+	fmt.Fprint(w, s.Rest)
 	return nil
 }
 
@@ -87,7 +87,7 @@ func Split(src []byte) *GoSrc {
 	s.Init(file, src, nil /* no error handler */, scanner.ScanComments)
 
 	var (
-		buf          = &gos.Header
+		buf          bytes.Buffer
 		i            int
 		packageFound bool
 	)
@@ -99,13 +99,14 @@ loop:
 		}
 		j := fset.Position(pos).Offset
 		if tok == token.PACKAGE {
+			gos.Header = buf.String()
+			buf.Reset()
 			buf.Write(src[i:j])
 			i = j
-			buf = &gos.Package
 		}
 
 		switch tok {
-		case token.STRING, token.IDENT:
+		case token.STRING, token.IDENT, token.COMMENT:
 			j = fset.Position(pos).Offset + len(lit)
 		default:
 			j = fset.Position(pos).Offset + len(tok.String())
@@ -125,9 +126,10 @@ loop:
 			packageFound = true
 		}
 	}
+	gos.Package = buf.String()
+	buf.Reset()
 
 	// scan for imports
-	buf = &gos.Imports
 	var endFound, multi bool
 	for {
 		pos, tok, lit := s.Scan()
@@ -164,27 +166,30 @@ loop:
 			break
 		}
 	}
+	gos.Imports = buf.String()
+	buf.Reset()
 
 	// and the rest
-	buf = &gos.Rest
 	if i < len(src) {
 		buf.Write(src[i:])
 	}
+
+	gos.Rest = buf.String()
 	return &gos
 }
 
 type GoSrc struct {
-	Header  bytes.Buffer // docs before package
-	Package bytes.Buffer // package
-	Imports bytes.Buffer // imports
-	Rest    bytes.Buffer // rest of the content
+	Header  string // docs before package
+	Package string // package
+	Imports string // imports
+	Rest    string // rest of the content
 }
 
 func (s *GoSrc) String() string {
 	var buf bytes.Buffer
-	s.Header.WriteTo(&buf)
-	s.Package.WriteTo(&buf)
-	s.Imports.WriteTo(&buf)
-	s.Rest.WriteTo(&buf)
+	buf.WriteString(s.Header)
+	buf.WriteString(s.Package)
+	buf.WriteString(s.Imports)
+	buf.WriteString(s.Rest)
 	return buf.String()
 }
