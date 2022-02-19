@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 )
-func main() {}
+func gomerge() {}
 
 // gomerge src: test
 // other

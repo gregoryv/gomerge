@@ -2,7 +2,7 @@ gomerge - command for merging Go files
 
 ## Quick start
 
-    $ go install github.com/gregoryv/gomerge@latest
+    $ go install github.com/gregoryv/gomerge/cmd/gomerge@latest
 	$ gomerge -h
     Options
       -i    include src filename in merged as comment

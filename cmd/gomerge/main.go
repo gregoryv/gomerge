@@ -9,6 +9,8 @@ import (
 	"log"
 	"os"
 	"os/exec"
+
+	"github.com/gregoryv/gomerge"
 )
 
 func main() {
@@ -37,7 +39,7 @@ func main() {
 	src := flag.Arg(1)
 
 	var buf bytes.Buffer
-	cmd := New(&buf, load(dst), load(src))
+	cmd := gomerge.New(&buf, load(dst), load(src))
 	cmd.SetIncludeFile(*incFile)
 	cmd.SetSrcFile(src)
 

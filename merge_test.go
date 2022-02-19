@@ -1,18 +1,12 @@
-package main
+package gomerge
 
 import (
 	"bytes"
-	"os"
 	"strings"
 	"testing"
 
 	"github.com/gregoryv/golden"
 )
-
-func Test_main(t *testing.T) {
-	os.Args = []string{"test", "main.go", "merge.go"}
-	main()
-}
 
 func TestSplit(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
@@ -93,7 +87,7 @@ func TestMerge(t *testing.T) {
 		dst = []byte(`// my pkg
 package x
 import "fmt"
-func main() {}
+func gomerge() {}
 `)
 		src = []byte(`// other
 package x
