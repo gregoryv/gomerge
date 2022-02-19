@@ -2,38 +2,11 @@ package gomerge
 
 import (
 	"bytes"
-	"os"
 	"strings"
 	"testing"
 
 	"github.com/gregoryv/golden"
 )
-
-func Example() {
-	Merge(os.Stdout,
-		[]byte(`package x
-
-import "fmt"
-
-func x() { fmt.Println("hello") }`),
-		[]byte(`package x
-
-import "strings"
-
-func y() { strings.Repeat(" ", 10) }`),
-	)
-	// output:
-	// package x
-	//
-	// import (
-	// 	"fmt"
-	// 	"strings"
-	// )
-	//
-	// func x() { fmt.Println("hello") }
-	//
-	// func y() { strings.Repeat(" ", 10) }
-}
 
 func TestParse(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
