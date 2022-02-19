@@ -14,7 +14,7 @@ func main() {
 	log.SetFlags(0)
 
 	flag.Usage = func() {
-		fmt.Println("Usage: gomerge [OPTION] SRC... DST")
+		fmt.Println("Usage: gomerge [OPTION] DST SRC")
 		flag.PrintDefaults()
 	}
 
@@ -24,17 +24,28 @@ func main() {
 
 	files := flag.Args()
 
-	if len(files) < 2 {
-		log.Fatal("missing files, ...src dst")
+	if len(files) != 2 {
+		log.Fatal("missing files, dst src")
 	}
 
+	dst := flag.Arg(0)
+	src := flag.Arg(1)
+
 	var buf bytes.Buffer
-	//Merge(&buf, files)
+	Merge(&buf, load(dst), load(src))
 
 	if !writeToFile {
 		os.Stdout.Write(buf.Bytes())
 		os.Exit(0)
 	}
-	dstFile := files[len(files)-1]
-	os.WriteFile(dstFile, buf.Bytes(), 0644)
+
+	os.WriteFile(dst, buf.Bytes(), 0644)
+}
+
+func load(filename string) []byte {
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return data
 }
