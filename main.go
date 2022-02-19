@@ -36,7 +36,13 @@ func main() {
 	src := flag.Arg(1)
 
 	var buf bytes.Buffer
-	Merge(&buf, load(dst), load(src))
+	cmd := GoMerge{
+		w:       &buf,
+		dst:     load(dst),
+		srcFile: src,
+		src:     load(src),
+	}
+	_ = cmd.Run()
 
 	if !*writeFile {
 		os.Stdout.Write(buf.Bytes())
