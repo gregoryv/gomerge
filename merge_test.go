@@ -9,19 +9,30 @@ import (
 	"github.com/gregoryv/golden"
 )
 
-func ExampleMerge() {
+func Example() {
 	Merge(os.Stdout,
 		[]byte(`package x
 
-func x() {}`),
+import "fmt"
+
+func x() { fmt.Println("hello") }`),
 		[]byte(`package x
-func y() {}`),
+
+import "strings"
+
+func y() { strings.Repeat(" ", 10) }`),
 	)
 	// output:
 	// package x
 	//
-	// func x() {}
-	// func y() {}
+	// import (
+	// 	"fmt"
+	// 	"strings"
+	// )
+	//
+	// func x() { fmt.Println("hello") }
+	//
+	// func y() { strings.Repeat(" ", 10) }
 }
 
 func TestSplit(t *testing.T) {
