@@ -128,7 +128,9 @@ func unique(v []string) []string {
 	return res
 }
 
-// Parse splits a valid go file content
+// Parse reads go file content into the different fields.  It does not
+// care if the code is proper or not, it only looks for the specific
+// elements in the field order.
 func Parse(src []byte) *GoSrc {
 	gos := GoSrc{}
 
