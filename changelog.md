@@ -6,6 +6,7 @@ and this project adheres to http://semver.org/spec/v2.0.0.html.
 
 ## [unreleased]
 
+- Fix Split for files without imports
 - Command moved to github.com/gregoryv/gomerge/cmd/gomerge
 
 ## [0.5.0] - 2022-02-19
