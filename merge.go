@@ -1,3 +1,5 @@
+// Package gomerge provides means to merge two go files removing
+// duplicate imports.
 package gomerge
 
 import (
@@ -9,6 +11,8 @@ import (
 	"strings"
 )
 
+// Merge creates and runs a default merge between two go source
+// expressions.
 func Merge(w io.Writer, dst, src []byte) error {
 	cmd := &GoMerge{
 		w:   w,

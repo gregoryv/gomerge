@@ -81,7 +81,7 @@ func x() {}
 	})
 }
 
-func TestMerge(t *testing.T) {
+func TestGoMerge_Run(t *testing.T) {
 	var (
 		buf bytes.Buffer
 		dst = []byte(`// my pkg
