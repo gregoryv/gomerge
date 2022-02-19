@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 )
 
 func main() {
@@ -19,8 +20,10 @@ func main() {
 		flag.PrintDefaults()
 	}
 
-	var writeFile bool
-	flag.BoolVar(&writeFile, "w", writeFile, "writes result to destination file")
+	var (
+		writeFile = flag.Bool("w", false, "writes result to destination file")
+		rmSrc     = flag.Bool("r", false, "removes source after merge")
+	)
 	flag.Parse()
 
 	files := flag.Args()
@@ -35,12 +38,16 @@ func main() {
 	var buf bytes.Buffer
 	Merge(&buf, load(dst), load(src))
 
-	if !writeFile {
+	if !*writeFile {
 		os.Stdout.Write(buf.Bytes())
 		os.Exit(0)
 	}
 
 	os.WriteFile(dst, buf.Bytes(), 0644)
+	if *rmSrc {
+		exec.Command("git", "rm", "-f", src).Run()
+		os.RemoveAll(src)
+	}
 }
 
 func load(filename string) []byte {
