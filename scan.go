@@ -15,17 +15,12 @@ func Split(src []byte) *GoSrc {
 	file := fset.AddFile("", fset.Base(), len(src))
 	s.Init(file, src, nil /* no error handler */, scanner.ScanComments)
 
-	gos.Header = findHeader(src, &s, fset)
-
-	return &gos
-}
-
-func findHeader(src []byte, s *scanner.Scanner, fset *token.FileSet) bytes.Buffer {
 	var (
-		buf bytes.Buffer
-		i   int
+		buf          = &gos.Header
+		i            int
+		packageFound bool
 	)
-
+loop:
 	for {
 		pos, tok, lit := s.Scan()
 		if tok == token.EOF {
@@ -47,10 +42,41 @@ func findHeader(src []byte, s *scanner.Scanner, fset *token.FileSet) bytes.Buffe
 			buf.Write(src[i:j])
 		}
 		i = j
-
-		// todo end after package has been found
+		switch {
+		case tok == token.SEMICOLON && packageFound:
+			break loop
+		case tok == token.PACKAGE:
+			packageFound = true
+		}
 	}
-	return buf
+
+	buf = &gos.Imports
+	for {
+		pos, tok, lit := s.Scan()
+		if tok == token.EOF {
+			break
+		}
+
+		var j int
+		switch tok {
+		case token.STRING, token.IDENT:
+			j = fset.Position(pos).Offset + len(lit)
+		default:
+			j = fset.Position(pos).Offset + len(tok.String())
+		}
+
+		//log.Println("i:", i, "j:", j)
+		if j >= len(src) {
+			buf.Write(src[i:])
+		} else {
+			buf.Write(src[i:j])
+		}
+		i = j
+		if tok == token.RPAREN {
+			break
+		}
+	}
+	return &gos
 }
 
 type GoSrc struct {

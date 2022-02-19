@@ -30,6 +30,9 @@ import "fmt"
 		if s.Header.Len() == 0 {
 			t.Error("empty header")
 		}
+		if strings.Contains(s.Header.String(), "import") {
+			t.Error("found import in header")
+		}
 		if s.Imports.Len() == 0 {
 			t.Error("empty imports")
 		}
