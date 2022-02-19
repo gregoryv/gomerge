@@ -106,7 +106,17 @@ import (
 func x() {}
 `)
 	)
-	if err := Merge(&buf, dst, src); err != nil {
+
+	cmd := GoMerge{
+		w:   &buf,
+		dst: dst,
+
+		includeFile: true,
+		srcFile:     "test",
+		src:         src,
+	}
+
+	if err := cmd.Run(); err != nil {
 		t.Fatal(err)
 	}
 

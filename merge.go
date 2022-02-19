@@ -21,7 +21,10 @@ func Merge(w io.Writer, dst, src []byte) error {
 type GoMerge struct {
 	w   io.Writer
 	dst []byte
-	src []byte
+
+	includeFile bool
+	srcFile     string
+	src         []byte
 }
 
 func (me *GoMerge) Run() error {
@@ -41,6 +44,11 @@ func (me *GoMerge) Run() error {
 	fmt.Fprint(w, "\n")
 
 	fmt.Fprint(w, d.Rest)
+
+	if me.includeFile {
+		fmt.Fprintln(w, "\n// gomerge src:", me.srcFile)
+	}
+	fmt.Fprint(w, s.Header)
 	fmt.Fprint(w, s.Rest)
 	return nil
 }

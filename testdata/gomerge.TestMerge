@@ -7,4 +7,6 @@ import (
 )
 func main() {}
 
+// gomerge src: test
+// other
 func x() {}
