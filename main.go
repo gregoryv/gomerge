@@ -22,7 +22,7 @@ func main() {
 
 	var (
 		writeFile = flag.Bool("w", false, "writes result to destination file")
-		rmSrc     = flag.Bool("r", false, "removes source after merge")
+		rmSrc     = flag.Bool("r", false, "removes source after merge(only with -w)")
 	)
 	flag.Parse()
 
@@ -45,6 +45,7 @@ func main() {
 
 	os.WriteFile(dst, buf.Bytes(), 0644)
 	if *rmSrc {
+		// try git rm -f first
 		exec.Command("git", "rm", "-f", src).Run()
 		os.RemoveAll(src)
 	}

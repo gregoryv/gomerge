@@ -5,5 +5,6 @@ gomerge - command for merging Go files
     $ go install github.com/gregoryv/gomerge@latest
 	$ gomerge -h
     Usage: gomerge [OPTION] DST SRC
-      -w    writes result to destination file
+      -r    removes source after merge(only with -w)
+	  -w    writes result to destination file
 
