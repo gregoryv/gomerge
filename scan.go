@@ -51,6 +51,7 @@ loop:
 	}
 
 	buf = &gos.Imports
+	var endFound bool
 	for {
 		pos, tok, lit := s.Scan()
 		if tok == token.EOF {
@@ -72,9 +73,17 @@ loop:
 			buf.Write(src[i:j])
 		}
 		i = j
-		if tok == token.RPAREN {
+		if endFound {
 			break
 		}
+		if tok == token.RPAREN {
+			endFound = true
+			continue
+		}
+	}
+	buf = &gos.Rest
+	if i < len(src) {
+		buf.Write(src[i:])
 	}
 	return &gos
 }
