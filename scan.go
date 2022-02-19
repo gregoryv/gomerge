@@ -50,8 +50,9 @@ loop:
 		}
 	}
 
+	// scan for imports
 	buf = &gos.Imports
-	var endFound bool
+	var endFound, multi bool
 	for {
 		pos, tok, lit := s.Scan()
 		if tok == token.EOF {
@@ -62,6 +63,9 @@ loop:
 		switch tok {
 		case token.STRING, token.IDENT:
 			j = fset.Position(pos).Offset + len(lit)
+		case token.LPAREN:
+			multi = true
+			j = fset.Position(pos).Offset + len(tok.String())
 		default:
 			j = fset.Position(pos).Offset + len(tok.String())
 		}
@@ -76,11 +80,16 @@ loop:
 		if endFound {
 			break
 		}
-		if tok == token.RPAREN {
+		if multi && tok == token.RPAREN {
 			endFound = true
 			continue
 		}
+		if !multi && tok == token.SEMICOLON {
+			break
+		}
 	}
+
+	// and the rest
 	buf = &gos.Rest
 	if i < len(src) {
 		buf.Write(src[i:])

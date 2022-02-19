@@ -17,8 +17,6 @@ func TestMerge(t *testing.T) {
 	if err := Merge(&buf, dst, src); err != nil {
 		t.Fatal(err)
 	}
-	t.Log("dst:", string(dst))
-	t.Log("\nsrc:", string(src))
-	t.Log("----------")
+
 	golden.Assert(t, buf.String())
 }

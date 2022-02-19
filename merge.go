@@ -1,101 +1,63 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
-	"go/token"
 	"io"
 	"strings"
 )
 
 func Merge(w io.Writer, dst, src []byte) error {
-	d := NewScanner(dst)
-	s := NewScanner(src)
+	d := Split(dst)
+	s := Split(src)
 
-	// todo assumes d has imports
-	d.ScanTo(token.IMPORT)
-	w.Write(d.Before())
+	d.Header.WriteTo(w)
+	fmt.Fprint(w, "\n")
 
-	imports := mergeStrings(
-		FindImports(NewScanner(dst)),
-		FindImports(NewScanner(src)),
+	imports := mergeImports(
+		d.Imports.Bytes(),
+		s.Imports.Bytes(),
 	)
+	w.Write(imports)
+	fmt.Fprint(w, "\n")
 
-	fmt.Fprint(w, "import (\n")
-	for _, imp := range imports {
-		fmt.Fprintf(w, "\t%s\n", imp)
-	}
-	fmt.Fprint(w, ")")
-
-	// TODO find end of optional imports
-	d.ScanTo(token.RPAREN)
-	w.Write(d.Rest())
-
-	// puts it at end of imports
-	if s.HasImports() {
-		MoveAfterImports(s)
-	} else {
-		s.ScanTo(token.PACKAGE)
-		s.ScanTo(token.STRING)
-	}
-	w.Write(s.Rest())
-
+	d.Rest.WriteTo(w)
+	s.Rest.WriteTo(w)
 	return nil
 }
 
-func mergeStrings(a, b []string) []string {
-	existing := make(map[string]int)
-	unique := make([]string, 0)
-	for _, line := range append(a, b...) {
+func mergeImports(a, b []byte) []byte {
+	var buf bytes.Buffer
+	all := append(
+		importLines(a),
+		importLines(b)...,
+	)
+	// todo filter duplicates
+	buf.WriteString("import (\n")
+	for _, line := range all {
+		buf.WriteString("\t")
+		buf.WriteString(line)
+		buf.WriteString("\n")
+	}
+	buf.WriteString(")")
+	return buf.Bytes()
+}
+
+func importLines(expr []byte) []string {
+	lines := strings.Split(string(expr), "\n")
+
+	res := make([]string, 0)
+	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		if _, found := existing[line]; found {
-			continue
-		}
-		existing[line] = 1
-		unique = append(unique, line)
-	}
-	return unique
-}
-
-func FindImports(s *Scanner) (importLines []string) {
-	// skip to imports
-	s.ScanTo(token.IMPORT)
-
-loop:
-	for {
-		pos, tok, lit := s.Scan()
-		//fmt.Printf("%s\t%s\t%q\n", fset.Position(pos), tok, lit)
-		switch tok {
-		case token.LPAREN:
-			s.lastEnd = s.fset.Position(pos).Offset + len(lit) + 2
-		case token.SEMICOLON:
-			s.lastEnd = s.fset.Position(pos).Offset + len(lit)
-
-		case token.IDENT: // renamed import
-			continue loop
-		case token.STRING:
-			i := s.fset.Position(pos).Offset + len(lit)
-			line := string(s.src[s.lastEnd:i])
-			importLines = append(importLines, line)
-			s.lastEnd = i
-		case token.RPAREN: // end of imports
-			break loop
-		case token.EOF: // no imports found
-			break loop
+		switch {
+		case line == "":
+		case line == ")":
+		case strings.HasPrefix(line, "import ("):
+		case strings.HasPrefix(line, "import "):
+			res = append(res, line[7:])
+		default:
+			res = append(res, line)
 		}
 	}
-	return
-}
-
-func MoveAfterImports(s *Scanner) {
-	if !s.HasImports() {
-		return
-	}
-	s.ScanTo(token.IMPORT)
-	_, tok, _ := s.Scan()
-	switch tok {
-	case token.LPAREN:
-		s.ScanTo(token.RPAREN)
-	case token.STRING:
-		s.ScanTo(token.SEMICOLON)
-	}
+	return res
 }
