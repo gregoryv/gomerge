@@ -37,13 +37,10 @@ func main() {
 	src := flag.Arg(1)
 
 	var buf bytes.Buffer
-	cmd := GoMerge{
-		w:           &buf,
-		dst:         load(dst),
-		includeFile: *incFile,
-		srcFile:     src,
-		src:         load(src),
-	}
+	cmd := New(&buf, load(dst), load(src))
+	cmd.SetIncludeFile(*incFile)
+	cmd.SetSrcFile(src)
+
 	_ = cmd.Run()
 
 	if !*writeFile {

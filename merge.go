@@ -18,6 +18,14 @@ func Merge(w io.Writer, dst, src []byte) error {
 	return cmd.Run()
 }
 
+func New(w io.Writer, dst, src []byte) *GoMerge {
+	return &GoMerge{
+		w:   w,
+		dst: dst,
+		src: src,
+	}
+}
+
 type GoMerge struct {
 	w   io.Writer
 	dst []byte
@@ -51,6 +59,14 @@ func (me *GoMerge) Run() error {
 	fmt.Fprint(w, s.Header)
 	fmt.Fprint(w, s.Rest)
 	return nil
+}
+
+func (me *GoMerge) SetIncludeFile(v bool) {
+	me.includeFile = v
+}
+
+func (me *GoMerge) SetSrcFile(v string) {
+	me.srcFile = v
 }
 
 func mergeImports(a, b []byte) []byte {
