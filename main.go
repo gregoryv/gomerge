@@ -23,6 +23,7 @@ func main() {
 	var (
 		writeFile = flag.Bool("w", false, "writes result to destination file")
 		rmSrc     = flag.Bool("r", false, "removes source after merge(only with -w)")
+		incFile   = flag.Bool("i", false, "include src filename in merged as comment")
 	)
 	flag.Parse()
 
@@ -37,10 +38,11 @@ func main() {
 
 	var buf bytes.Buffer
 	cmd := GoMerge{
-		w:       &buf,
-		dst:     load(dst),
-		srcFile: src,
-		src:     load(src),
+		w:           &buf,
+		dst:         load(dst),
+		includeFile: *incFile,
+		srcFile:     src,
+		src:         load(src),
 	}
 	_ = cmd.Run()
 
