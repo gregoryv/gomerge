@@ -15,8 +15,17 @@ func Split(src []byte) *GoSrc {
 	file := fset.AddFile("", fset.Base(), len(src))
 	s.Init(file, src, nil /* no error handler */, scanner.ScanComments)
 
-	current := &gos.Header
-	var i int
+	gos.Header = findHeader(src, &s, fset)
+
+	return &gos
+}
+
+func findHeader(src []byte, s *scanner.Scanner, fset *token.FileSet) bytes.Buffer {
+	var (
+		buf bytes.Buffer
+		i   int
+	)
+
 	for {
 		pos, tok, lit := s.Scan()
 		if tok == token.EOF {
@@ -33,14 +42,15 @@ func Split(src []byte) *GoSrc {
 
 		//log.Println("i:", i, "j:", j)
 		if j >= len(src) {
-			current.Write(src[i:])
+			buf.Write(src[i:])
 		} else {
-			current.Write(src[i:j])
+			buf.Write(src[i:j])
 		}
 		i = j
-	}
 
-	return &gos
+		// todo end after package has been found
+	}
+	return buf
 }
 
 type GoSrc struct {

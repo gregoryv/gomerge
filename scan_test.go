@@ -20,6 +20,24 @@ func TestSplit(t *testing.T) {
 			t.Error("found rest: ", s.Rest.String())
 		}
 	})
+
+	t.Run("one import", func(t *testing.T) {
+		data := []byte(`package x
+
+import "fmt"
+`)
+		s := Split(data)
+		if s.Header.Len() == 0 {
+			t.Error("empty header")
+		}
+		if s.Imports.Len() == 0 {
+			t.Error("empty imports")
+		}
+		if s.Rest.Len() != 0 {
+			t.Error("found rest: ", s.Rest.String())
+		}
+	})
+
 }
 
 func TestScanner_FindImports(t *testing.T) {
