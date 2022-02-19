@@ -6,6 +6,22 @@ import (
 	"testing"
 )
 
+func TestSplit(t *testing.T) {
+	t.Run("plain", func(t *testing.T) {
+		data := []byte(`package x`)
+		s := Split(data)
+		if s.Header.Len() == 0 {
+			t.Error("empty header")
+		}
+		if s.Imports.Len() != 0 {
+			t.Error("found imports: ", s.Imports.String())
+		}
+		if s.Rest.Len() != 0 {
+			t.Error("found rest: ", s.Rest.String())
+		}
+	})
+}
+
 func TestScanner_FindImports(t *testing.T) {
 	t.Run("multiline imports", func(t *testing.T) {
 		s, _ := NewFileScanner("testdata/a.go")

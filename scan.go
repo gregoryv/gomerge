@@ -7,6 +7,56 @@ import (
 	"os"
 )
 
+func Split(src []byte) *GoSrc {
+	gos := GoSrc{}
+
+	var s scanner.Scanner
+	fset := token.NewFileSet()
+	file := fset.AddFile("", fset.Base(), len(src))
+	s.Init(file, src, nil /* no error handler */, scanner.ScanComments)
+
+	current := &gos.Header
+	var i int
+	for {
+		pos, tok, lit := s.Scan()
+		if tok == token.EOF {
+			break
+		}
+
+		var j int
+		switch tok {
+		case token.STRING, token.IDENT:
+			j = fset.Position(pos).Offset + len(lit)
+		default:
+			j = fset.Position(pos).Offset + len(tok.String())
+		}
+
+		//log.Println("i:", i, "j:", j)
+		if j >= len(src) {
+			current.Write(src[i:])
+		} else {
+			current.Write(src[i:j])
+		}
+		i = j
+	}
+
+	return &gos
+}
+
+type GoSrc struct {
+	Header  bytes.Buffer // docs and package
+	Imports bytes.Buffer // imports
+	Rest    bytes.Buffer // rest of the content
+}
+
+func (s *GoSrc) String() string {
+	var buf bytes.Buffer
+	s.Header.WriteTo(&buf)
+	s.Imports.WriteTo(&buf)
+	s.Rest.WriteTo(&buf)
+	return buf.String()
+}
+
 func NewFileScanner(filename string) (*Scanner, error) {
 	src, err := os.ReadFile(filename)
 	if err != nil {
