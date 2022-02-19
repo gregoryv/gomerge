@@ -40,7 +40,7 @@ func main() {
 
 	if !*writeFile {
 		os.Stdout.Write(buf.Bytes())
-		os.Exit(0)
+		return
 	}
 
 	os.WriteFile(dst, buf.Bytes(), 0644)

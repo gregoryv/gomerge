@@ -2,11 +2,17 @@ package main
 
 import (
 	"bytes"
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/gregoryv/golden"
 )
+
+func Test_main(t *testing.T) {
+	os.Args = []string{"test", "main.go", "merge.go"}
+	main()
+}
 
 func TestSplit(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
