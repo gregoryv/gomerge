@@ -10,8 +10,24 @@ import (
 )
 
 func Merge(w io.Writer, dst, src []byte) error {
-	d := Split(dst)
-	s := Split(src)
+	cmd := &GoMerge{
+		w:   w,
+		dst: dst,
+		src: src,
+	}
+	return cmd.Run()
+}
+
+type GoMerge struct {
+	w   io.Writer
+	dst []byte
+	src []byte
+}
+
+func (me *GoMerge) Run() error {
+	d := Split(me.dst)
+	s := Split(me.src)
+	w := me.w
 
 	fmt.Fprint(w, d.Header)
 	fmt.Fprint(w, d.Package)
