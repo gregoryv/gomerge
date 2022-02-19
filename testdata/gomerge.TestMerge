@@ -1,18 +1,10 @@
-package testdata
+// my pkg
+package x
 
 import (
 	"fmt"
 	"strings"
 )
+func main() {}
 
-type Car struct{}
-
-// y does stuff
-func y() {
-	letters := []string{"a", "b"}
-	fmt.Println(strings.Join(letters, ","))
-}
-
-func x() {
-	fmt.Println("hello")
-}
+func x() {}
