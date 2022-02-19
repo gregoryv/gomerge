@@ -34,7 +34,7 @@ func mergeImports(a, b []byte) []byte {
 	)
 	// todo filter duplicates
 	buf.WriteString("import (\n")
-	for _, line := range all {
+	for _, line := range unique(all) {
 		buf.WriteString("\t")
 		buf.WriteString(line)
 		buf.WriteString("\n")
@@ -58,6 +58,19 @@ func importLines(expr []byte) []string {
 		default:
 			res = append(res, line)
 		}
+	}
+	return res
+}
+
+func unique(v []string) []string {
+	h := make(map[string]int)
+	res := make([]string, 0)
+	for _, v := range v {
+		if _, found := h[v]; found {
+			continue
+		}
+		h[v] = 1
+		res = append(res, v)
 	}
 	return res
 }

@@ -16,7 +16,7 @@ func x() {}
 	s := Split(data)
 	fmt.Println(s.Imports.String())
 	// output:
-	// "fmt"
+	// import "fmt"
 }
 
 func ExampleSplit() {
