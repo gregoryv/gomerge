@@ -2,80 +2,18 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/gregoryv/golden"
 )
 
-func TestMerge(t *testing.T) {
-	var (
-		buf bytes.Buffer
-		dst = []byte(`// my pkg
-package x
-import "fmt"
-func main() {}
-`)
-		src = []byte(`// other
-package x
-
-import (
-"fmt"
-"strings"
-)
-
-func x() {}
-`)
-	)
-	if err := Merge(&buf, dst, src); err != nil {
-		t.Fatal(err)
-	}
-
-	golden.Assert(t, buf.String())
-}
-
-func ExampleSplit_header() {
-	data := []byte(`// my docs
-package x
-`)
-	s := Split(data)
-	fmt.Println(s.Header)
-	// output:
-	// // my docs
-}
-
-func ExampleSplit_single() {
-	data := []byte(`package x
-
-import "fmt"
-
-func x() {}
-`)
-	s := Split(data)
-	fmt.Println(s.Imports)
-	// output:
-	// import "fmt"
-}
-
-func ExampleSplit() {
-	data := []byte(`package x
-
-import (
-	"fmt"
-)
-
-func x() {}
-`)
-	s := Split(data)
-	fmt.Println(s.Imports)
-	// output:
-	//	import (
-	//	"fmt"
-	//)
-}
-
 func TestSplit(t *testing.T) {
+	t.Run("empty", func(t *testing.T) {
+		data := []byte{}
+		Split(data)
+	})
+
 	t.Run("plain", func(t *testing.T) {
 		data := []byte(`package x`)
 		s := Split(data)
@@ -90,6 +28,9 @@ func TestSplit(t *testing.T) {
 		}
 		if len(s.Rest) != 0 {
 			t.Error("found rest: ", s.Rest)
+		}
+		if s.String() != string(data) {
+			t.Error("not equal")
 		}
 	})
 
@@ -138,4 +79,30 @@ func x() {}
 			t.Error("empty rest")
 		}
 	})
+}
+
+func TestMerge(t *testing.T) {
+	var (
+		buf bytes.Buffer
+		dst = []byte(`// my pkg
+package x
+import "fmt"
+func main() {}
+`)
+		src = []byte(`// other
+package x
+
+import (
+"fmt"
+"strings"
+)
+
+func x() {}
+`)
+	)
+	if err := Merge(&buf, dst, src); err != nil {
+		t.Fatal(err)
+	}
+
+	golden.Assert(t, buf.String())
 }
