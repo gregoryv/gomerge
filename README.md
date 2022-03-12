@@ -11,6 +11,7 @@ files and removing duplicate package imports.
 
     $ go install github.com/gregoryv/gomerge/cmd/gomerge@latest
 	$ gomerge -h
+	Usage: gomerge [OPTIONS] DST SRC
     Options
       -i    include src filename in merged as comment
       -r    removes source after merge(only with -w)
