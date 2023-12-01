@@ -23,8 +23,8 @@ func main() {
 	}
 
 	var (
-		writeFile = flag.Bool("w", false, "writes result to destination file")
-		rmSrc     = flag.Bool("r", false, "removes source after merge(only with -w)")
+		writeFile = flag.Bool("w", true, "writes result to destination file")
+		rmSrc     = flag.Bool("r", true, "removes source after merge(only with -w)")
 		incFile   = flag.Bool("i", false, "include src filename in merged as comment")
 	)
 	flag.Parse()

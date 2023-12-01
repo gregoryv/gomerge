@@ -6,6 +6,7 @@ and this project adheres to http://semver.org/spec/v2.0.0.html.
 
 ## [unreleased]
 
+- Flags -r and -w are true by default, the most common usecase
 - Update license text, still MIT but using the original text(wrapped)
 
 ## [0.6.0] - 2022-02-19
