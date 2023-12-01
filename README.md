@@ -14,6 +14,6 @@ files and removing duplicate package imports.
 	Usage: gomerge [OPTIONS] DST SRC
     Options
       -i    include src filename in merged as comment
-      -r    removes source after merge(only with -w)
-      -w    writes result to destination file
+      -r    removes source after merge(only with -w) (default true)
+      -w    writes result to destination file (default true)
 
