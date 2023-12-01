@@ -85,12 +85,16 @@ func mergeImports(a, b []byte) []byte {
 	if len(all) == 0 {
 		return nil
 	}
-	// todo filter duplicates
 	buf.WriteString("import (\n")
+	var last string
 	for _, line := range all {
+		if last == line {			
+			continue
+		}
 		buf.WriteString("\t")
 		buf.WriteString(line)
 		buf.WriteString("\n")
+		last = line		
 	}
 	buf.WriteString(")")
 	return buf.Bytes()
