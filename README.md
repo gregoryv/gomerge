@@ -1,3 +1,5 @@
+ARCHIVED! Moved to https://sogvin.com/gomerge
+
 [gomerge](https://pkg.go.dev/github.com/gregoryv/gomerge) - constructs for merging Go files
 
 When dealing with over structured(to many directory and files)
