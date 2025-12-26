@@ -88,13 +88,13 @@ func mergeImports(a, b []byte) []byte {
 	buf.WriteString("import (\n")
 	var last string
 	for _, line := range all {
-		if last == line {			
+		if last == line {
 			continue
 		}
 		buf.WriteString("\t")
 		buf.WriteString(line)
 		buf.WriteString("\n")
-		last = line		
+		last = line
 	}
 	buf.WriteString(")")
 	return buf.Bytes()

@@ -4,7 +4,7 @@ When dealing with over structured(to many directory and files)
 repositories, one route to tidying them is to merge files with related
 concepts. This often simplifies additional refactoring.
 
-The provided cmd/gomerge removes the manual steps of concatenating go
+The provided cmd/gomerge removes manual steps in concatenating go
 files and removing duplicate package imports.
 
 ## Quick start
